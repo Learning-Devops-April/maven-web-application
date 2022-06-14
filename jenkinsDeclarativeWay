@@ -1,0 +1,47 @@
+pipeline {
+    agent any
+    tools {
+        maven 'Maven 3.8.4'
+    }
+    
+    options {
+      timestamps()
+      buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5')
+    }
+
+    
+    stages {
+        
+        stage('GithubIntegration') {
+            steps {
+                git branch: 'development', credentialsId: 'b4d83e06-a9fc-496d-8650-1700bd65739b', url: 'https://github.com/Learning-Devops-April/maven-web-application.git'
+            }
+        }
+        
+        stage('mavenBuild') {
+            steps {
+                sh "mvn clean package"
+            }
+        }
+        
+        stage('SonarReport') {
+            steps {
+                sh "mvn sonar:sonar"
+            }
+        }
+        
+        stage('NexusDeploy') {
+            steps {
+                sh "mvn clean deploy"
+            }
+        }
+        
+        stage('TomcatDeploy') {
+            steps {
+                sshagent(['ed591055-2715-49ad-8f76-b5814347c97b']) {
+                    sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@172.31.7.70:/opt/apache-tomcat-9.0.63/webapps"
+                }
+            }
+        }
+    }
+}
