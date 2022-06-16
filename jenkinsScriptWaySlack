@@ -1,5 +1,3 @@
-@Library('sharedLib') _
-
 node{
     
     def mavenHome = tool name: 'Maven 3.8.4'
@@ -42,7 +40,7 @@ node{
         notifyBuild(currentBuild.result)
     }
 }
-def notifyBuild(String buildStatus = 'STARTED') {
+ def notifyBuild(String buildStatus = 'STARTED') {
   // build status of null means successful
   buildStatus =  buildStatus ?: 'SUCCESSFUL'
 
